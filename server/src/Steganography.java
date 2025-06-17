@@ -2,11 +2,8 @@ import java.io.*;
 
 public class Steganography {
     public static void hideMessage(String inputImagePath, String outputImagePath, String message) throws Exception {
-        File inputFile = new File(inputImagePath);
-        File outputFile = new File(outputImagePath);
-
-        try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(inputFile));
-             BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(outputFile))) {
+        try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(inputImagePath));
+             BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(outputImagePath))) {
 
             // 读取BMP文件头 (14 bytes) 和信息头 (40 bytes)
             byte[] fileHeader = new byte[14];
@@ -43,7 +40,7 @@ public class Steganography {
                 bos.write(byteValue);
             }
 
-            // 写入消息
+            // 写入消息内容
             int messageIndex = 0;
             int bitIndex = 0;
 
@@ -74,4 +71,4 @@ public class Steganography {
             }
         }
     }
-}    
+}
