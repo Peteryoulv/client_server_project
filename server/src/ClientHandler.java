@@ -21,22 +21,28 @@ public class ClientHandler implements Runnable {
         ) {
             String clientMessage;
             while ((clientMessage = in.readLine()) != null) {
-                // 接收客户端消息并处理
+                // 安全处理命令和参数
                 String[] parts = clientMessage.split(" ", 2);
                 String command = parts[0];
+                String param = parts.length > 1 ? parts[1] : "";
 
                 switch (command) {
                     case "UPLOAD_FILE":
                         handleFileUpload(in);
                         break;
                     case "UPLOAD_DATA":
-                        handleDataUpload(parts[1]);
+                        handleDataUpload(param);
                         break;
                     case "CHECK_VERSION":
-                        out.println("VERSION 1.0"); // 示例版本号
+                        out.println("VERSION 1.0");
                         break;
+                    case "EXIT":
+                        System.out.println("客户端断开连接");
+                        return;
                     default:
-                        out.println("UNKNOWN_COMMAND");
+                        System.out.println("客户端消息: " + clientMessage);
+                        // 可选：响应普通消息
+                        // out.println("收到消息: " + clientMessage);
                 }
             }
         } catch (IOException e) {
@@ -51,6 +57,7 @@ public class ClientHandler implements Runnable {
     }
 
     private void handleFileUpload(BufferedReader in) throws IOException {
+        // 文件上传处理逻辑保持不变
         String fileName = in.readLine();
         String fileSizeStr = in.readLine();
         long fileSize = Long.parseLong(fileSizeStr);
@@ -74,10 +81,11 @@ public class ClientHandler implements Runnable {
             // 如果是BMP文件，尝试隐写
             if (fileName.toLowerCase().endsWith(".bmp")) {
                 try {
-                    String secretMessage = "This is a hidden message"; // 示例隐写信息
+                    String secretMessage = "This is a hidden message from server";
                     Steganography.hideMessage("server_files/" + fileName,
                             "server_files/stego_" + fileName,
                             secretMessage);
+                    System.out.println("已对BMP文件完成隐写");
                 } catch (Exception e) {
                     System.err.println("隐写失败: " + e.getMessage());
                 }
@@ -90,5 +98,6 @@ public class ClientHandler implements Runnable {
     private void handleDataUpload(String base64Data) {
         String decodedData = new String(Base64.getDecoder().decode(base64Data), StandardCharsets.UTF_8);
         databaseManager.saveData(decodedData);
+        System.out.println("已保存数据: " + decodedData);
     }
-}    
+}
